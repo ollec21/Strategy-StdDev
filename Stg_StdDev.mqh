@@ -6,114 +6,120 @@
 
 /**
  * @file
- * Implements StdDev strategy.
+ * Implements StdDev strategy the Standard Deviation indicator.
  */
 
 // Includes.
-#include "../../EA31337-classes/Indicators/Indi_StdDev.mqh"
-#include "../../EA31337-classes/Strategy.mqh"
+#include <EA31337-classes/Indicators/Indi_StdDev.mqh>
+#include <EA31337-classes/Strategy.mqh>
 
 // User input params.
-string __StdDev_Parameters__ = "-- Settings for the Standard Deviation indicator --";  // >>> STDDEV <<<
-uint StdDev_Active_Tf = 0;            // Activate timeframes (1-255, e.g. M1=1,M5=2,M15=4,M30=8,H1=16,H2=32...)
-int StdDev_MA_Period = 10;            // Period
-int StdDev_MA_Shift = 0;              // Shift
-ENUM_MA_METHOD StdDev_MA_Method = 1;  // MA Method
-ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;          // Applied Price
-int StdDev_Shift = 0;                                           // Shift
-ENUM_TRAIL_TYPE StdDev_TrailingStopMethod = 22;                 // Trail stop method
-ENUM_TRAIL_TYPE StdDev_TrailingProfitMethod = 1;                // Trail profit method
-double StdDev_SignalLevel = 0.00000000;                         // Signal level
-int StdDev1_SignalMethod = 0;                                   // Signal method for M1 (0-
-int StdDev5_SignalMethod = 0;                                   // Signal method for M5 (0-
-int StdDev15_SignalMethod = 0;                                  // Signal method for M15 (0-
-int StdDev30_SignalMethod = 0;                                  // Signal method for M30 (0-
-int StdDev1_OpenCondition1 = 0;                                 // Open condition 1 for M1 (0-1023)
-int StdDev1_OpenCondition2 = 0;                                 // Open condition 2 for M1 (0-)
-ENUM_MARKET_EVENT StdDev1_CloseCondition = C_STDDEV_BUY_SELL;   // Close condition for M1
-int StdDev5_OpenCondition1 = 0;                                 // Open condition 1 for M5 (0-1023)
-int StdDev5_OpenCondition2 = 0;                                 // Open condition 2 for M5 (0-)
-ENUM_MARKET_EVENT StdDev5_CloseCondition = C_STDDEV_BUY_SELL;   // Close condition for M5
-int StdDev15_OpenCondition1 = 0;                                // Open condition 1 for M15 (0-)
-int StdDev15_OpenCondition2 = 0;                                // Open condition 2 for M15 (0-)
-ENUM_MARKET_EVENT StdDev15_CloseCondition = C_STDDEV_BUY_SELL;  // Close condition for M15
-int StdDev30_OpenCondition1 = 0;                                // Open condition 1 for M30 (0-)
-int StdDev30_OpenCondition2 = 0;                                // Open condition 2 for M30 (0-)
-ENUM_MARKET_EVENT StdDev30_CloseCondition = C_STDDEV_BUY_SELL;  // Close condition for M30
-double StdDev1_MaxSpread = 6.0;                                 // Max spread to trade for M1 (pips)
-double StdDev5_MaxSpread = 7.0;                                 // Max spread to trade for M5 (pips)
-double StdDev15_MaxSpread = 8.0;                                // Max spread to trade for M15 (pips)
-double StdDev30_MaxSpread = 10.0;                               // Max spread to trade for M30 (pips)
+INPUT string __StdDev_Parameters__ = "-- StdDev strategy params --";  // >>> STDDEV <<<
+INPUT int StdDev_Active_Tf = 0;             // Activate timeframes (1-255, e.g. M1=1,M5=2,M15=4,M30=8,H1=16,H2=32...)
+INPUT int StdDev_MA_Period = 10;            // Period
+INPUT int StdDev_MA_Shift = 0;              // Shift
+INPUT ENUM_MA_METHOD StdDev_MA_Method = 1;  // MA Method
+INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;         // Applied Price
+INPUT int StdDev_Shift = 0;                                          // Shift
+INPUT ENUM_TRAIL_TYPE StdDev_TrailingStopMethod = 22;                // Trail stop method
+INPUT ENUM_TRAIL_TYPE StdDev_TrailingProfitMethod = 1;               // Trail profit method
+INPUT double StdDev_SignalOpenLevel = 0.00000000;                    // Signal open level
+INPUT int StdDev1_SignalBaseMethod = 0;                              // Signal base method (0-
+INPUT int StdDev1_OpenCondition1 = 0;                                // Open condition 1 (0-1023)
+INPUT int StdDev1_OpenCondition2 = 0;                                // Open condition 2 (0-)
+INPUT ENUM_MARKET_EVENT StdDev1_CloseCondition = C_STDDEV_BUY_SELL;  // Close condition for M1
+INPUT double StdDev_MaxSpread = 6.0;                                 // Max spread to trade (pips)
+
+// Struct to define strategy parameters to override.
+struct Stg_StdDev_Params : Stg_Params {
+  unsigned int StdDev_Period;
+  ENUM_APPLIED_PRICE StdDev_Applied_Price;
+  int StdDev_Shift;
+  ENUM_TRAIL_TYPE StdDev_TrailingStopMethod;
+  ENUM_TRAIL_TYPE StdDev_TrailingProfitMethod;
+  double StdDev_SignalOpenLevel;
+  long StdDev_SignalBaseMethod;
+  long StdDev_SignalOpenMethod1;
+  long StdDev_SignalOpenMethod2;
+  double StdDev_SignalCloseLevel;
+  ENUM_MARKET_EVENT StdDev_SignalCloseMethod1;
+  ENUM_MARKET_EVENT StdDev_SignalCloseMethod2;
+  double StdDev_MaxSpread;
+
+  // Constructor: Set default param values.
+  Stg_StdDev_Params()
+      : StdDev_Period(::StdDev_Period),
+        StdDev_Applied_Price(::StdDev_Applied_Price),
+        StdDev_Shift(::StdDev_Shift),
+        StdDev_TrailingStopMethod(::StdDev_TrailingStopMethod),
+        StdDev_TrailingProfitMethod(::StdDev_TrailingProfitMethod),
+        StdDev_SignalOpenLevel(::StdDev_SignalOpenLevel),
+        StdDev_SignalBaseMethod(::StdDev_SignalBaseMethod),
+        StdDev_SignalOpenMethod1(::StdDev_SignalOpenMethod1),
+        StdDev_SignalOpenMethod2(::StdDev_SignalOpenMethod2),
+        StdDev_SignalCloseLevel(::StdDev_SignalCloseLevel),
+        StdDev_SignalCloseMethod1(::StdDev_SignalCloseMethod1),
+        StdDev_SignalCloseMethod2(::StdDev_SignalCloseMethod2),
+        StdDev_MaxSpread(::StdDev_MaxSpread) {}
+};
+
+// Loads pair specific param values.
+#include "sets/EURUSD_H1.h"
+#include "sets/EURUSD_H4.h"
+#include "sets/EURUSD_M1.h"
+#include "sets/EURUSD_M15.h"
+#include "sets/EURUSD_M30.h"
+#include "sets/EURUSD_M5.h"
 
 class Stg_StdDev : public Strategy {
  public:
   Stg_StdDev(StgParams &_params, string _name) : Strategy(_params, _name) {}
 
-  static Stg_StdDev *Init_M1() {
-    ChartParams cparams1(PERIOD_M1);
-    IndicatorParams stddev_iparams(10, INDI_STDDEV);
-    StdDev_Params stddev1_iparams(StdDev_MA_Period, StdDev_MA_Shift, StdDev_MA_Method, StdDev_Applied_Price);
-    StgParams stddev1_sparams(new Trade(PERIOD_M1, _Symbol), new Indi_StdDev(stddev1_iparams, stddev_iparams, cparams1),
-                              NULL, NULL);
-    stddev1_sparams.SetSignals(StdDev1_SignalMethod, StdDev1_OpenCondition1, StdDev1_OpenCondition2,
-                               StdDev1_CloseCondition, NULL, StdDev_SignalLevel, NULL);
-    stddev1_sparams.SetStops(StdDev_TrailingProfitMethod, StdDev_TrailingStopMethod);
-    stddev1_sparams.SetMaxSpread(StdDev1_MaxSpread);
-    stddev1_sparams.SetId(STDDEV1);
-    return (new Stg_StdDev(stddev1_sparams, "StdDev1"));
-  }
-  static Stg_StdDev *Init_M5() {
-    ChartParams cparams5(PERIOD_M5);
-    IndicatorParams stddev_iparams(10, INDI_STDDEV);
-    StdDev_Params stddev5_iparams(StdDev_MA_Period, StdDev_MA_Shift, StdDev_MA_Method, StdDev_Applied_Price);
-    StgParams stddev5_sparams(new Trade(PERIOD_M5, _Symbol), new Indi_StdDev(stddev5_iparams, stddev_iparams, cparams5),
-                              NULL, NULL);
-    stddev5_sparams.SetSignals(StdDev5_SignalMethod, StdDev5_OpenCondition1, StdDev5_OpenCondition2,
-                               StdDev5_CloseCondition, NULL, StdDev_SignalLevel, NULL);
-    stddev5_sparams.SetStops(StdDev_TrailingProfitMethod, StdDev_TrailingStopMethod);
-    stddev5_sparams.SetMaxSpread(StdDev5_MaxSpread);
-    stddev5_sparams.SetId(STDDEV5);
-    return (new Stg_StdDev(stddev5_sparams, "StdDev5"));
-  }
-  static Stg_StdDev *Init_M15() {
-    ChartParams cparams15(PERIOD_M15);
-    IndicatorParams stddev_iparams(10, INDI_STDDEV);
-    StdDev_Params stddev15_iparams(StdDev_MA_Period, StdDev_MA_Shift, StdDev_MA_Method, StdDev_Applied_Price);
-    StgParams stddev15_sparams(new Trade(PERIOD_M15, _Symbol),
-                               new Indi_StdDev(stddev15_iparams, stddev_iparams, cparams15), NULL, NULL);
-    stddev15_sparams.SetSignals(StdDev15_SignalMethod, StdDev15_OpenCondition1, StdDev15_OpenCondition2,
-                                StdDev15_CloseCondition, NULL, StdDev_SignalLevel, NULL);
-    stddev15_sparams.SetStops(StdDev_TrailingProfitMethod, StdDev_TrailingStopMethod);
-    stddev15_sparams.SetMaxSpread(StdDev15_MaxSpread);
-    stddev15_sparams.SetId(STDDEV15);
-    return (new Stg_StdDev(stddev15_sparams, "StdDev15"));
-  }
-  static Stg_StdDev *Init_M30() {
-    ChartParams cparams30(PERIOD_M30);
-    IndicatorParams stddev_iparams(10, INDI_STDDEV);
-    StdDev_Params stddev30_iparams(StdDev_MA_Period, StdDev_MA_Shift, StdDev_MA_Method, StdDev_Applied_Price);
-    StgParams stddev30_sparams(new Trade(PERIOD_M30, _Symbol),
-                               new Indi_StdDev(stddev30_iparams, stddev_iparams, cparams30), NULL, NULL);
-    stddev30_sparams.SetSignals(StdDev30_SignalMethod, StdDev30_OpenCondition1, StdDev30_OpenCondition2,
-                                StdDev30_CloseCondition, NULL, StdDev_SignalLevel, NULL);
-    stddev30_sparams.SetStops(StdDev_TrailingProfitMethod, StdDev_TrailingStopMethod);
-    stddev30_sparams.SetMaxSpread(StdDev30_MaxSpread);
-    stddev30_sparams.SetId(STDDEV30);
-    return (new Stg_StdDev(stddev30_sparams, "StdDev30"));
-  }
-  static Stg_StdDev *Init(ENUM_TIMEFRAMES _tf) {
+  static Stg_StdDev *Init(ENUM_TIMEFRAMES _tf = NULL, long _magic_no = NULL, ENUM_LOG_LEVEL _log_level = V_INFO) {
+    // Initialize strategy initial values.
+    Stg_StdDev_Params _params;
     switch (_tf) {
-      case PERIOD_M1:
-        return Init_M1();
-      case PERIOD_M5:
-        return Init_M5();
-      case PERIOD_M15:
-        return Init_M15();
-      case PERIOD_M30:
-        return Init_M30();
-      default:
-        return NULL;
+      case PERIOD_M1: {
+        Stg_StdDev_EURUSD_M1_Params _new_params;
+        _params = _new_params;
+      }
+      case PERIOD_M5: {
+        Stg_StdDev_EURUSD_M5_Params _new_params;
+        _params = _new_params;
+      }
+      case PERIOD_M15: {
+        Stg_StdDev_EURUSD_M15_Params _new_params;
+        _params = _new_params;
+      }
+      case PERIOD_M30: {
+        Stg_StdDev_EURUSD_M30_Params _new_params;
+        _params = _new_params;
+      }
+      case PERIOD_H1: {
+        Stg_StdDev_EURUSD_H1_Params _new_params;
+        _params = _new_params;
+      }
+      case PERIOD_H4: {
+        Stg_StdDev_EURUSD_H4_Params _new_params;
+        _params = _new_params;
+      }
     }
+    // Initialize strategy parameters.
+    ChartParams cparams(_tf);
+    StdDev_Params adx_params(_params.StdDev_Period, _params.StdDev_Applied_Price);
+    IndicatorParams adx_iparams(10, INDI_StdDev);
+    StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(adx_params, adx_iparams, cparams), NULL, NULL);
+    sparams.logger.SetLevel(_log_level);
+    sparams.SetMagicNo(_magic_no);
+    sparams.SetSignals(_params.StdDev_SignalBaseMethod, _params.StdDev_SignalOpenMethod1,
+                       _params.StdDev_SignalOpenMethod2, _params.StdDev_SignalCloseMethod1,
+                       _params.StdDev_SignalCloseMethod2, _params.StdDev_SignalOpenLevel,
+                       _params.StdDev_SignalCloseLevel);
+    sparams.SetStops(_params.StdDev_TrailingProfitMethod, _params.StdDev_TrailingStopMethod);
+    sparams.SetMaxSpread(_params.StdDev_MaxSpread);
+    // Initialize strategy instance.
+    Strategy *_strat = new Stg_StdDev(sparams, "StdDev");
+    return _strat;
   }
 
   /**
@@ -158,5 +164,13 @@ class Stg_StdDev : public Strategy {
         break;
     }
     return _result;
+  }
+
+  /**
+   * Check strategy's closing signal.
+   */
+  bool SignalClose(ENUM_ORDER_TYPE _cmd, long _signal_method = EMPTY, double _signal_level = EMPTY) {
+    if (_signal_level == EMPTY) _signal_level = GetSignalCloseLevel();
+    return SignalOpen(Order::NegateOrderType(_cmd), _signal_method, _signal_level);
   }
 };
