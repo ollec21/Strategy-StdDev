@@ -15,35 +15,30 @@
 
 // User input params.
 INPUT string __StdDev_Parameters__ = "-- StdDev strategy params --";  // >>> STDDEV <<<
-INPUT int StdDev_Active_Tf = 0;             // Activate timeframes (1-255, e.g. M1=1,M5=2,M15=4,M30=8,H1=16,H2=32...)
-INPUT int StdDev_MA_Period = 10;            // Period
-INPUT int StdDev_MA_Shift = 0;              // Shift
-INPUT ENUM_MA_METHOD StdDev_MA_Method = 1;  // MA Method
-INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;         // Applied Price
-INPUT int StdDev_Shift = 0;                                          // Shift
-INPUT ENUM_TRAIL_TYPE StdDev_TrailingStopMethod = 22;                // Trail stop method
-INPUT ENUM_TRAIL_TYPE StdDev_TrailingProfitMethod = 1;               // Trail profit method
-INPUT double StdDev_SignalOpenLevel = 0.00000000;                    // Signal open level
-INPUT int StdDev1_SignalBaseMethod = 0;                              // Signal base method (0-
-INPUT int StdDev1_OpenCondition1 = 0;                                // Open condition 1 (0-1023)
-INPUT int StdDev1_OpenCondition2 = 0;                                // Open condition 2 (0-)
-INPUT ENUM_MARKET_EVENT StdDev1_CloseCondition = C_STDDEV_BUY_SELL;  // Close condition for M1
-INPUT double StdDev_MaxSpread = 6.0;                                 // Max spread to trade (pips)
+INPUT int StdDev_MA_Period = 10;                                      // Period
+INPUT int StdDev_MA_Shift = 0;                                        // Shift
+INPUT ENUM_MA_METHOD StdDev_MA_Method = 1;                            // MA Method
+INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;          // Applied Price
+INPUT int StdDev_Shift = 0;                                           // Shift
+INPUT int StdDev_SignalOpenMethod = 0;                                // Signal open method (0-
+INPUT double StdDev_SignalOpenLevel = 0.00000000;                     // Signal open level
+INPUT int StdDev_SignalCloseMethod = 0;                               // Signal close method (0-
+INPUT double StdDev_SignalCloseLevel = 0.00000000;                    // Signal close level
+INPUT int StdDev_PriceLimitMethod = 0;                                // Price limit method
+INPUT double StdDev_PriceLimitLevel = 0;                              // Price limit level
+INPUT double StdDev_MaxSpread = 6.0;                                  // Max spread to trade (pips)
 
 // Struct to define strategy parameters to override.
 struct Stg_StdDev_Params : Stg_Params {
   unsigned int StdDev_Period;
   ENUM_APPLIED_PRICE StdDev_Applied_Price;
   int StdDev_Shift;
-  ENUM_TRAIL_TYPE StdDev_TrailingStopMethod;
-  ENUM_TRAIL_TYPE StdDev_TrailingProfitMethod;
+  long StdDev_SignalOpenMethod;
   double StdDev_SignalOpenLevel;
-  long StdDev_SignalBaseMethod;
-  long StdDev_SignalOpenMethod1;
-  long StdDev_SignalOpenMethod2;
+  int StdDev_SignalCloseMethod;
   double StdDev_SignalCloseLevel;
-  ENUM_MARKET_EVENT StdDev_SignalCloseMethod1;
-  ENUM_MARKET_EVENT StdDev_SignalCloseMethod2;
+  int StdDev_PriceLimitMethod;
+  double StdDev_PriceLimitLevel;
   double StdDev_MaxSpread;
 
   // Constructor: Set default param values.
@@ -51,15 +46,12 @@ struct Stg_StdDev_Params : Stg_Params {
       : StdDev_Period(::StdDev_Period),
         StdDev_Applied_Price(::StdDev_Applied_Price),
         StdDev_Shift(::StdDev_Shift),
-        StdDev_TrailingStopMethod(::StdDev_TrailingStopMethod),
-        StdDev_TrailingProfitMethod(::StdDev_TrailingProfitMethod),
+        StdDev_SignalOpenMethod(::StdDev_SignalOpenMethod),
         StdDev_SignalOpenLevel(::StdDev_SignalOpenLevel),
-        StdDev_SignalBaseMethod(::StdDev_SignalBaseMethod),
-        StdDev_SignalOpenMethod1(::StdDev_SignalOpenMethod1),
-        StdDev_SignalOpenMethod2(::StdDev_SignalOpenMethod2),
+        StdDev_SignalCloseMethod(::StdDev_SignalCloseMethod),
         StdDev_SignalCloseLevel(::StdDev_SignalCloseLevel),
-        StdDev_SignalCloseMethod1(::StdDev_SignalCloseMethod1),
-        StdDev_SignalCloseMethod2(::StdDev_SignalCloseMethod2),
+        StdDev_PriceLimitMethod(::StdDev_PriceLimitMethod),
+        StdDev_PriceLimitLevel(::StdDev_PriceLimitLevel),
         StdDev_MaxSpread(::StdDev_MaxSpread) {}
 };
 
@@ -111,11 +103,8 @@ class Stg_StdDev : public Strategy {
     StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(adx_params, adx_iparams, cparams), NULL, NULL);
     sparams.logger.SetLevel(_log_level);
     sparams.SetMagicNo(_magic_no);
-    sparams.SetSignals(_params.StdDev_SignalBaseMethod, _params.StdDev_SignalOpenMethod1,
-                       _params.StdDev_SignalOpenMethod2, _params.StdDev_SignalCloseMethod1,
-                       _params.StdDev_SignalCloseMethod2, _params.StdDev_SignalOpenLevel,
-                       _params.StdDev_SignalCloseLevel);
-    sparams.SetStops(_params.StdDev_TrailingProfitMethod, _params.StdDev_TrailingStopMethod);
+    sparams.SetSignals(_params.StdDev_SignalOpenMethod, _params.StdDev_SignalOpenMethod,
+                       _params.StdDev_SignalCloseMethod, _params.StdDev_SignalCloseMethod);
     sparams.SetMaxSpread(_params.StdDev_MaxSpread);
     // Initialize strategy instance.
     Strategy *_strat = new Stg_StdDev(sparams, "StdDev");
@@ -128,17 +117,16 @@ class Stg_StdDev : public Strategy {
    * @param
    *   _cmd (int) - type of trade order command
    *   period (int) - period to check for
-   *   _signal_method (int) - signal method to use by using bitwise AND operation
-   *   _signal_level1 (double) - signal level to consider the signal
+   *   _method (int) - signal method to use by using bitwise AND operation
+   *   _level1 (double) - signal level to consider the signal
    */
-  bool SignalOpen(ENUM_ORDER_TYPE _cmd, long _signal_method = EMPTY, double _signal_level = EMPTY) {
+  bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
     bool _result = false;
     double stddev_0 = ((Indi_StdDev *)this.Data()).GetValue(0);
     double stddev_1 = ((Indi_StdDev *)this.Data()).GetValue(1);
     double stddev_2 = ((Indi_StdDev *)this.Data()).GetValue(2);
-    if (_signal_method == EMPTY) _signal_method = GetSignalBaseMethod();
-    if (_signal_level1 == EMPTY) _signal_level1 = GetSignalLevel1();
-    if (_signal_level2 == EMPTY) _signal_level2 = GetSignalLevel2();
+    if (_level1 == EMPTY) _level1 = GetSignalLevel1();
+    if (_level2 == EMPTY) _level2 = GetSignalLevel2();
     switch (_cmd) {
       /*
         //27. Standard Deviation
@@ -153,13 +141,13 @@ class Stg_StdDev : public Strategy {
       case ORDER_TYPE_BUY:
         /*
           bool _result = StdDev_0[LINE_LOWER] != 0.0 || StdDev_1[LINE_LOWER] != 0.0 || StdDev_2[LINE_LOWER] != 0.0;
-          if (METHOD(_signal_method, 0)) _result &= Open[CURR] > Close[CURR];
+          if (METHOD(_method, 0)) _result &= Open[CURR] > Close[CURR];
           */
         break;
       case ORDER_TYPE_SELL:
         /*
           bool _result = StdDev_0[LINE_UPPER] != 0.0 || StdDev_1[LINE_UPPER] != 0.0 || StdDev_2[LINE_UPPER] != 0.0;
-          if (METHOD(_signal_method, 0)) _result &= Open[CURR] < Close[CURR];
+          if (METHOD(_method, 0)) _result &= Open[CURR] < Close[CURR];
           */
         break;
     }
@@ -169,8 +157,23 @@ class Stg_StdDev : public Strategy {
   /**
    * Check strategy's closing signal.
    */
-  bool SignalClose(ENUM_ORDER_TYPE _cmd, long _signal_method = EMPTY, double _signal_level = EMPTY) {
-    if (_signal_level == EMPTY) _signal_level = GetSignalCloseLevel();
-    return SignalOpen(Order::NegateOrderType(_cmd), _signal_method, _signal_level);
+  bool SignalClose(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
+    return SignalOpen(Order::NegateOrderType(_cmd), _method, _level);
+  }
+
+  /**
+   * Gets price limit value for profit take or stop loss.
+   */
+  double PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_STG_PRICE_LIMIT_MODE _mode, int _method = 0, double _level = 0.0) {
+    double _trail = _level * Market().GetPipSize();
+    int _direction = Order::OrderDirection(_cmd) * (_mode == LIMIT_VALUE_STOP ? -1 : 1);
+    double _default_value = Market().GetCloseOffer(_cmd) + _trail * _method * _direction;
+    double _result = _default_value;
+    switch (_method) {
+      case 0: {
+        // @todo
+      }
+    }
+    return _result;
   }
 };

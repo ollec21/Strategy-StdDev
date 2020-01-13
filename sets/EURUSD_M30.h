@@ -12,15 +12,12 @@ struct Stg_StdDev_EURUSD_M30_Params : Stg_StdDev_Params {
     StdDev_Period = 2;
     StdDev_Applied_Price = 3;
     StdDev_Shift = 0;
-    StdDev_TrailingStopMethod = 6;
-    StdDev_TrailingProfitMethod = 11;
+    StdDev_SignalOpenMethod = 0;
     StdDev_SignalOpenLevel = 36;
-    StdDev_SignalBaseMethod = 0;
-    StdDev_SignalOpenMethod1 = 195;
-    StdDev_SignalOpenMethod2 = 0;
+    StdDev_SignalCloseMethod = 1;
     StdDev_SignalCloseLevel = 36;
-    StdDev_SignalCloseMethod1 = 1;
-    StdDev_SignalCloseMethod2 = 0;
+    StdDev_PriceLimitMethod = 0;
+    StdDev_PriceLimitLevel = 0;
     StdDev_MaxSpread = 5;
   }
 };
