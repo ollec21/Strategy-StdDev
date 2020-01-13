@@ -9,8 +9,10 @@ struct Stg_StdDev_EURUSD_M30_Params : Stg_StdDev_Params {
   Stg_StdDev_EURUSD_M30_Params() {
     symbol = "EURUSD";
     tf = PERIOD_M30;
-    StdDev_Period = 2;
-    StdDev_Applied_Price = 3;
+    StdDev_MA_Period = 10;
+    StdDev_MA_Shift = 0;
+    StdDev_MA_Method = 0;
+    StdDev_Applied_Price = 1;
     StdDev_Shift = 0;
     StdDev_SignalOpenMethod = 0;
     StdDev_SignalOpenLevel = 36;

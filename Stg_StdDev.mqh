@@ -15,7 +15,7 @@
 
 // User input params.
 INPUT string __StdDev_Parameters__ = "-- StdDev strategy params --";  // >>> STDDEV <<<
-INPUT int StdDev_MA_Period = 10;                                      // Period
+INPUT unsigned int StdDev_MA_Period = 10;                             // Period
 INPUT int StdDev_MA_Shift = 0;                                        // Shift
 INPUT ENUM_MA_METHOD StdDev_MA_Method = 1;                            // MA Method
 INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;          // Applied Price
@@ -30,10 +30,12 @@ INPUT double StdDev_MaxSpread = 6.0;                                  // Max spr
 
 // Struct to define strategy parameters to override.
 struct Stg_StdDev_Params : Stg_Params {
-  unsigned int StdDev_Period;
+  unsigned int StdDev_MA_Period;
+  int StdDev_MA_Shift;
+  ENUM_MA_METHOD StdDev_MA_Method;
   ENUM_APPLIED_PRICE StdDev_Applied_Price;
   int StdDev_Shift;
-  long StdDev_SignalOpenMethod;
+  int StdDev_SignalOpenMethod;
   double StdDev_SignalOpenLevel;
   int StdDev_SignalCloseMethod;
   double StdDev_SignalCloseLevel;
@@ -43,7 +45,9 @@ struct Stg_StdDev_Params : Stg_Params {
 
   // Constructor: Set default param values.
   Stg_StdDev_Params()
-      : StdDev_Period(::StdDev_Period),
+      : StdDev_MA_Period(::StdDev_MA_Period),
+        StdDev_MA_Shift(::StdDev_MA_Shift),
+        StdDev_MA_Method(::StdDev_MA_Method),
         StdDev_Applied_Price(::StdDev_Applied_Price),
         StdDev_Shift(::StdDev_Shift),
         StdDev_SignalOpenMethod(::StdDev_SignalOpenMethod),
@@ -98,9 +102,9 @@ class Stg_StdDev : public Strategy {
     }
     // Initialize strategy parameters.
     ChartParams cparams(_tf);
-    StdDev_Params adx_params(_params.StdDev_Period, _params.StdDev_Applied_Price);
-    IndicatorParams adx_iparams(10, INDI_StdDev);
-    StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(adx_params, adx_iparams, cparams), NULL, NULL);
+    StdDev_Params stddev_params(_params.StdDev_MA_Period, _params.StdDev_MA_Shift, _params.StdDev_MA_Method, _params.StdDev_Applied_Price);
+    IndicatorParams stddev_iparams(10, INDI_STDDEV);
+    StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(stddev_params, stddev_iparams, cparams), NULL, NULL);
     sparams.logger.SetLevel(_log_level);
     sparams.SetMagicNo(_magic_no);
     sparams.SetSignals(_params.StdDev_SignalOpenMethod, _params.StdDev_SignalOpenMethod,
@@ -112,21 +116,13 @@ class Stg_StdDev : public Strategy {
   }
 
   /**
-   * Check if StdDev indicator is on buy or sell.
-   *
-   * @param
-   *   _cmd (int) - type of trade order command
-   *   period (int) - period to check for
-   *   _method (int) - signal method to use by using bitwise AND operation
-   *   _level1 (double) - signal level to consider the signal
+   * Check strategy's opening signal.
    */
   bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
     bool _result = false;
     double stddev_0 = ((Indi_StdDev *)this.Data()).GetValue(0);
     double stddev_1 = ((Indi_StdDev *)this.Data()).GetValue(1);
     double stddev_2 = ((Indi_StdDev *)this.Data()).GetValue(2);
-    if (_level1 == EMPTY) _level1 = GetSignalLevel1();
-    if (_level2 == EMPTY) _level2 = GetSignalLevel2();
     switch (_cmd) {
       /*
         //27. Standard Deviation
