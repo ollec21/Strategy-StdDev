@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                  EA31337 - multi-strategy advanced trading robot |
-//|                       Copyright 2016-2019, 31337 Investments Ltd |
+//|                       Copyright 2016-2020, 31337 Investments Ltd |
 //|                                       https://github.com/EA31337 |
 //+------------------------------------------------------------------+
 
@@ -22,6 +22,8 @@ INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;          // Applied
 INPUT int StdDev_Shift = 0;                                           // Shift
 INPUT int StdDev_SignalOpenMethod = 0;                                // Signal open method (0-
 INPUT double StdDev_SignalOpenLevel = 0.00000000;                     // Signal open level
+INPUT int StdDev_SignalOpenFilterMethod = 0.00000000;                 // Signal open filter method
+INPUT int StdDev_SignalOpenBoostMethod = 0.00000000;                  // Signal open boost method
 INPUT int StdDev_SignalCloseMethod = 0;                               // Signal close method (0-
 INPUT double StdDev_SignalCloseLevel = 0.00000000;                    // Signal close level
 INPUT int StdDev_PriceLimitMethod = 0;                                // Price limit method
@@ -37,6 +39,8 @@ struct Stg_StdDev_Params : Stg_Params {
   int StdDev_Shift;
   int StdDev_SignalOpenMethod;
   double StdDev_SignalOpenLevel;
+  int StdDev_SignalOpenFilterMethod;
+  int StdDev_SignalOpenBoostMethod;
   int StdDev_SignalCloseMethod;
   double StdDev_SignalCloseLevel;
   int StdDev_PriceLimitMethod;
@@ -52,6 +56,8 @@ struct Stg_StdDev_Params : Stg_Params {
         StdDev_Shift(::StdDev_Shift),
         StdDev_SignalOpenMethod(::StdDev_SignalOpenMethod),
         StdDev_SignalOpenLevel(::StdDev_SignalOpenLevel),
+        StdDev_SignalOpenFilterMethod(::StdDev_SignalOpenFilterMethod),
+        StdDev_SignalOpenBoostMethod(::StdDev_SignalOpenBoostMethod),
         StdDev_SignalCloseMethod(::StdDev_SignalCloseMethod),
         StdDev_SignalCloseLevel(::StdDev_SignalCloseLevel),
         StdDev_PriceLimitMethod(::StdDev_PriceLimitMethod),
@@ -102,12 +108,14 @@ class Stg_StdDev : public Strategy {
     }
     // Initialize strategy parameters.
     ChartParams cparams(_tf);
-    StdDev_Params stddev_params(_params.StdDev_MA_Period, _params.StdDev_MA_Shift, _params.StdDev_MA_Method, _params.StdDev_Applied_Price);
+    StdDev_Params stddev_params(_params.StdDev_MA_Period, _params.StdDev_MA_Shift, _params.StdDev_MA_Method,
+                                _params.StdDev_Applied_Price);
     IndicatorParams stddev_iparams(10, INDI_STDDEV);
     StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(stddev_params, stddev_iparams, cparams), NULL, NULL);
     sparams.logger.SetLevel(_log_level);
     sparams.SetMagicNo(_magic_no);
     sparams.SetSignals(_params.StdDev_SignalOpenMethod, _params.StdDev_SignalOpenMethod,
+                       _params.StdDev_SignalOpenFilterMethod, _params.StdDev_SignalOpenBoostMethod,
                        _params.StdDev_SignalCloseMethod, _params.StdDev_SignalCloseMethod);
     sparams.SetMaxSpread(_params.StdDev_MaxSpread);
     // Initialize strategy instance.
@@ -151,6 +159,38 @@ class Stg_StdDev : public Strategy {
   }
 
   /**
+   * Check strategy's opening signal additional filter.
+   */
+  bool SignalOpenFilter(ENUM_ORDER_TYPE _cmd, int _method = 0) {
+    bool _result = true;
+    if (_method != 0) {
+      // if (METHOD(_method, 0)) _result &= Trade().IsTrend(_cmd);
+      // if (METHOD(_method, 1)) _result &= Trade().IsPivot(_cmd);
+      // if (METHOD(_method, 2)) _result &= Trade().IsPeakHours(_cmd);
+      // if (METHOD(_method, 3)) _result &= Trade().IsRoundNumber(_cmd);
+      // if (METHOD(_method, 4)) _result &= Trade().IsHedging(_cmd);
+      // if (METHOD(_method, 5)) _result &= Trade().IsPeakBar(_cmd);
+    }
+    return _result;
+  }
+
+  /**
+   * Gets strategy's lot size boost (when enabled).
+   */
+  double SignalOpenBoost(ENUM_ORDER_TYPE _cmd, int _method = 0) {
+    bool _result = 1.0;
+    if (_method != 0) {
+      // if (METHOD(_method, 0)) if (Trade().IsTrend(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 1)) if (Trade().IsPivot(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 2)) if (Trade().IsPeakHours(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 3)) if (Trade().IsRoundNumber(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 4)) if (Trade().IsHedging(_cmd)) _result *= 1.1;
+      // if (METHOD(_method, 5)) if (Trade().IsPeakBar(_cmd)) _result *= 1.1;
+    }
+    return _result;
+  }
+
+  /**
    * Check strategy's closing signal.
    */
   bool SignalClose(ENUM_ORDER_TYPE _cmd, int _method = 0, double _level = 0.0) {
@@ -160,9 +200,9 @@ class Stg_StdDev : public Strategy {
   /**
    * Gets price limit value for profit take or stop loss.
    */
-  double PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_STG_PRICE_LIMIT_MODE _mode, int _method = 0, double _level = 0.0) {
+  double PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, double _level = 0.0) {
     double _trail = _level * Market().GetPipSize();
-    int _direction = Order::OrderDirection(_cmd) * (_mode == LIMIT_VALUE_STOP ? -1 : 1);
+    int _direction = Order::OrderDirection(_cmd) * (_mode == ORDER_TYPE_SL ? -1 : 1);
     double _default_value = Market().GetCloseOffer(_cmd) + _trail * _method * _direction;
     double _result = _default_value;
     switch (_method) {
