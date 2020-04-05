@@ -94,6 +94,7 @@ class Stg_StdDev : public Strategy {
     sparams.SetSignals(_params.StdDev_SignalOpenMethod, _params.StdDev_SignalOpenMethod,
                        _params.StdDev_SignalOpenFilterMethod, _params.StdDev_SignalOpenBoostMethod,
                        _params.StdDev_SignalCloseMethod, _params.StdDev_SignalCloseMethod);
+    sparams.SetPriceLimits(_params.StdDev_PriceLimitMethod, _params.StdDev_PriceLimitLevel);
     sparams.SetMaxSpread(_params.StdDev_MaxSpread);
     // Initialize strategy instance.
     Strategy *_strat = new Stg_StdDev(sparams, "StdDev");
