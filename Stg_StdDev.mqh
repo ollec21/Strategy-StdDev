@@ -89,7 +89,7 @@ class Stg_StdDev : public Strategy {
                                 _params.StdDev_Applied_Price);
     stddev_params.SetTf(_tf);
     StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(stddev_params), NULL, NULL);
-    sparams.logger.SetLevel(_log_level);
+    sparams.logger.Ptr().SetLevel(_log_level);
     sparams.SetMagicNo(_magic_no);
     sparams.SetSignals(_params.StdDev_SignalOpenMethod, _params.StdDev_SignalOpenMethod,
                        _params.StdDev_SignalOpenFilterMethod, _params.StdDev_SignalOpenBoostMethod,
