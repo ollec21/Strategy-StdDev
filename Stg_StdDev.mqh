@@ -10,14 +10,14 @@ INPUT ENUM_MA_METHOD StdDev_MA_Method = 1;                    // MA Method
 INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;  // Applied Price
 INPUT int StdDev_Shift = 0;                                   // Shift
 INPUT int StdDev_SignalOpenMethod = 0;                        // Signal open method (0-
-INPUT float StdDev_SignalOpenLevel = 0.00000000;             // Signal open level
+INPUT float StdDev_SignalOpenLevel = 0.00000000;              // Signal open level
 INPUT int StdDev_SignalOpenFilterMethod = 0.00000000;         // Signal open filter method
 INPUT int StdDev_SignalOpenBoostMethod = 0.00000000;          // Signal open boost method
 INPUT int StdDev_SignalCloseMethod = 0;                       // Signal close method (0-
-INPUT float StdDev_SignalCloseLevel = 0.00000000;            // Signal close level
+INPUT float StdDev_SignalCloseLevel = 0.00000000;             // Signal close level
 INPUT int StdDev_PriceLimitMethod = 0;                        // Price limit method
-INPUT float StdDev_PriceLimitLevel = 0;                      // Price limit level
-INPUT float StdDev_MaxSpread = 6.0;                          // Max spread to trade (pips)
+INPUT float StdDev_PriceLimitLevel = 0;                       // Price limit level
+INPUT float StdDev_MaxSpread = 6.0;                           // Max spread to trade (pips)
 
 // Includes.
 #include <EA31337-classes/Indicators/Indi_StdDev.mqh>
@@ -31,14 +31,14 @@ struct Stg_StdDev_Params : StgParams {
   ENUM_APPLIED_PRICE StdDev_Applied_Price;
   int StdDev_Shift;
   int StdDev_SignalOpenMethod;
-  double StdDev_SignalOpenLevel;
+  float StdDev_SignalOpenLevel;
   int StdDev_SignalOpenFilterMethod;
   int StdDev_SignalOpenBoostMethod;
   int StdDev_SignalCloseMethod;
-  double StdDev_SignalCloseLevel;
+  float StdDev_SignalCloseLevel;
   int StdDev_PriceLimitMethod;
-  double StdDev_PriceLimitLevel;
-  double StdDev_MaxSpread;
+  float StdDev_PriceLimitLevel;
+  float StdDev_MaxSpread;
 
   // Constructor: Set default param values.
   Stg_StdDev_Params()
@@ -95,10 +95,28 @@ class Stg_StdDev : public Strategy {
   }
 
   /**
-   * Check strategy's closing signal.
+   * Check strategy's opening signal.
    */
-  bool SignalClose(ENUM_ORDER_TYPE _cmd, int _method = 0, float _level = 0.0) {
-    return SignalOpen(Order::NegateOrderType(_cmd), _method, _level);
+  bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method = 0, float _level = 0.0) {
+    Indi_StdDev *_indi = Data();
+    bool _is_valid = _indi[CURR].IsValid() && _indi[PREV].IsValid() && _indi[PPREV].IsValid();
+    bool _result = _is_valid;
+    if (_is_valid) {
+      // Note: It doesn't give independent signals. Is used to define volatility (trend strength).
+      switch (_cmd) {
+        case ORDER_TYPE_BUY:
+          _result = _indi[CURR].value[0] > _indi[PREV].value[0] + _level;
+          if (METHOD(_method, 0)) _result &= Chart().GetClose() > Chart().GetOpen();
+          if (METHOD(_method, 1)) _result &= Chart().GetOpen(CURR) > Chart().GetOpen(PREV);
+          break;
+        case ORDER_TYPE_SELL:
+          _result = _indi[CURR].value[0] > _indi[PREV].value[0] + _level;
+          if (METHOD(_method, 0)) _result &= Chart().GetClose() < Chart().GetOpen();
+          if (METHOD(_method, 1)) _result &= Chart().GetOpen(CURR) < Chart().GetOpen(PREV);
+          break;
+      }
+    }
+    return _result;
   }
 
   /**
@@ -140,6 +158,6 @@ class Stg_StdDev : public Strategy {
       }
       _result += _trail * _direction;
     }
-    return _result;
+    return (float)_result;
   }
 };
