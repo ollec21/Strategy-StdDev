@@ -1,23 +1,27 @@
-//+------------------------------------------------------------------+
-//|                  EA31337 - multi-strategy advanced trading robot |
-//|                       Copyright 2016-2020, 31337 Investments Ltd |
-//|                                       https://github.com/EA31337 |
-//+------------------------------------------------------------------+
+/*
+ * @file
+ * Defines default strategy parameter values for the given timeframe.
+ */
+
+// Defines indicator's parameter values for the given pair symbol and timeframe.
+struct Indi_StdDev_Params_M15 : Indi_StdDev_Params {
+  Indi_StdDev_Params_M15() : Indi_StdDev_Params(indi_stddev_defaults, PERIOD_M15) { shift = 0; }
+} indi_stddev_m15;
 
 // Defines strategy's parameter values for the given pair symbol and timeframe.
-struct Stg_StdDev_EURUSD_M15_Params : Stg_StdDev_Params {
-  Stg_StdDev_EURUSD_M15_Params() {
-    StdDev_MA_Period = 10;
-    StdDev_MA_Shift = 0;
-    StdDev_MA_Method = 0;
-    StdDev_Applied_Price = 1;
-    StdDev_Shift = 0;
-    StdDev_SignalOpenMethod = -63;
-    StdDev_SignalOpenLevel = 36;
-    StdDev_SignalCloseMethod = 1;
-    StdDev_SignalCloseLevel = 36;
-    StdDev_PriceLimitMethod = 0;
-    StdDev_PriceLimitLevel = 0;
-    StdDev_MaxSpread = 4;
+struct Stg_StdDev_Params_M15 : StgParams {
+  // Struct constructor.
+  Stg_StdDev_Params_M15() : StgParams(stg_stddev_defaults) {
+    lot_size = 0;
+    signal_open_method = 0;
+    signal_open_filter = 1;
+    signal_open_level = 0;
+    signal_open_boost = 0;
+    signal_close_method = 0;
+    signal_close_level = 0;
+    price_limit_method = 0;
+    price_limit_level = 2;
+    tick_filter_method = 1;
+    max_spread = 0;
   }
 } stg_stddev_m15;

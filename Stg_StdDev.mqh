@@ -3,64 +3,71 @@
  * Implements StdDev strategy the Standard Deviation indicator.
  */
 
-// User input params.
-INPUT unsigned int StdDev_MA_Period = 10;                     // Period
-INPUT int StdDev_MA_Shift = 0;                                // Shift
-INPUT ENUM_MA_METHOD StdDev_MA_Method = 1;                    // MA Method
-INPUT ENUM_APPLIED_PRICE StdDev_Applied_Price = PRICE_CLOSE;  // Applied Price
-INPUT int StdDev_Shift = 0;                                   // Shift
-INPUT int StdDev_SignalOpenMethod = 0;                        // Signal open method (0-
-INPUT float StdDev_SignalOpenLevel = 0.00000000;              // Signal open level
-INPUT int StdDev_SignalOpenFilterMethod = 0.00000000;         // Signal open filter method
-INPUT int StdDev_SignalOpenBoostMethod = 0.00000000;          // Signal open boost method
-INPUT int StdDev_SignalCloseMethod = 0;                       // Signal close method (0-
-INPUT float StdDev_SignalCloseLevel = 0.00000000;             // Signal close level
-INPUT int StdDev_PriceLimitMethod = 0;                        // Price limit method
-INPUT float StdDev_PriceLimitLevel = 0;                       // Price limit level
-INPUT float StdDev_MaxSpread = 6.0;                           // Max spread to trade (pips)
-
 // Includes.
 #include <EA31337-classes/Indicators/Indi_StdDev.mqh>
 #include <EA31337-classes/Strategy.mqh>
 
+// User input params.
+INPUT float StdDev_LotSize = 0;                        // Lot size
+INPUT int StdDev_SignalOpenMethod = 0;                 // Signal open method (0-
+INPUT float StdDev_SignalOpenLevel = 0.00000000;       // Signal open level
+INPUT int StdDev_SignalOpenFilterMethod = 0.00000000;  // Signal open filter method
+INPUT int StdDev_SignalOpenBoostMethod = 0.00000000;   // Signal open boost method
+INPUT int StdDev_SignalCloseMethod = 0;                // Signal close method (0-
+INPUT float StdDev_SignalCloseLevel = 0.00000000;      // Signal close level
+INPUT int StdDev_PriceLimitMethod = 0;                 // Price limit method
+INPUT float StdDev_PriceLimitLevel = 0;                // Price limit level
+INPUT int StdDev_TickFilterMethod = 0;                 // Tick filter method
+INPUT float StdDev_MaxSpread = 6.0;                    // Max spread to trade (pips)
+INPUT int StdDev_Shift = 0;                            // Shift
+INPUT string __StdDev_Indi_StdDev_Parameters__ =
+    "-- StdDev strategy: StdDev indicator params --";              // >>> StdDev strategy: StdDev indicator <<<
+INPUT int Indi_StdDev_MA_Period = 10;                              // Period
+INPUT int Indi_StdDev_MA_Shift = 0;                                // Shift
+INPUT ENUM_MA_METHOD Indi_StdDev_MA_Method = 1;                    // MA Method
+INPUT ENUM_APPLIED_PRICE Indi_StdDev_Applied_Price = PRICE_CLOSE;  // Applied Price
+
+// Structs.
+
+// Defines struct with default user indicator values.
+struct Indi_StdDev_Params_Defaults : StdDevParams {
+  Indi_StdDev_Params_Defaults()
+      : StdDevParams(::Indi_StdDev_MA_Period, ::Indi_StdDev_MA_Shift, ::Indi_StdDev_MA_Method,
+                     ::Indi_StdDev_Applied_Price) {}
+} indi_stddev_defaults;
+
+// Defines struct to store indicator parameter values.
+struct Indi_StdDev_Params : public StdDevParams {
+  // Struct constructors.
+  void Indi_StdDev_Params(StdDevParams &_params, ENUM_TIMEFRAMES _tf) : StdDevParams(_params, _tf) {}
+};
+
+// Defines struct with default user strategy values.
+struct Stg_StdDev_Params_Defaults : StgParams {
+  Stg_StdDev_Params_Defaults()
+      : StgParams(::StdDev_SignalOpenMethod, ::StdDev_SignalOpenFilterMethod, ::StdDev_SignalOpenLevel,
+                  ::StdDev_SignalOpenBoostMethod, ::StdDev_SignalCloseMethod, ::StdDev_SignalCloseLevel,
+                  ::StdDev_PriceLimitMethod, ::StdDev_PriceLimitLevel, ::StdDev_TickFilterMethod, ::StdDev_MaxSpread,
+                  ::StdDev_Shift) {}
+} stg_stddev_defaults;
+
 // Struct to define strategy parameters to override.
 struct Stg_StdDev_Params : StgParams {
-  unsigned int StdDev_MA_Period;
-  int StdDev_MA_Shift;
-  ENUM_MA_METHOD StdDev_MA_Method;
-  ENUM_APPLIED_PRICE StdDev_Applied_Price;
-  int StdDev_Shift;
-  int StdDev_SignalOpenMethod;
-  float StdDev_SignalOpenLevel;
-  int StdDev_SignalOpenFilterMethod;
-  int StdDev_SignalOpenBoostMethod;
-  int StdDev_SignalCloseMethod;
-  float StdDev_SignalCloseLevel;
-  int StdDev_PriceLimitMethod;
-  float StdDev_PriceLimitLevel;
-  float StdDev_MaxSpread;
+  Indi_StdDev_Params iparams;
+  StgParams sparams;
 
-  // Constructor: Set default param values.
-  Stg_StdDev_Params()
-      : StdDev_MA_Period(::StdDev_MA_Period),
-        StdDev_MA_Shift(::StdDev_MA_Shift),
-        StdDev_MA_Method(::StdDev_MA_Method),
-        StdDev_Applied_Price(::StdDev_Applied_Price),
-        StdDev_Shift(::StdDev_Shift),
-        StdDev_SignalOpenMethod(::StdDev_SignalOpenMethod),
-        StdDev_SignalOpenLevel(::StdDev_SignalOpenLevel),
-        StdDev_SignalOpenFilterMethod(::StdDev_SignalOpenFilterMethod),
-        StdDev_SignalOpenBoostMethod(::StdDev_SignalOpenBoostMethod),
-        StdDev_SignalCloseMethod(::StdDev_SignalCloseMethod),
-        StdDev_SignalCloseLevel(::StdDev_SignalCloseLevel),
-        StdDev_PriceLimitMethod(::StdDev_PriceLimitMethod),
-        StdDev_PriceLimitLevel(::StdDev_PriceLimitLevel),
-        StdDev_MaxSpread(::StdDev_MaxSpread) {}
+  // Struct constructors.
+  Stg_StdDev_Params(Indi_StdDev_Params &_iparams, StgParams &_sparams)
+      : iparams(indi_stddev_defaults, _iparams.tf), sparams(stg_stddev_defaults) {
+    iparams = _iparams;
+    sparams = _sparams;
+  }
 };
 
 // Loads pair specific param values.
 #include "sets/EURUSD_H1.h"
 #include "sets/EURUSD_H4.h"
+#include "sets/EURUSD_H8.h"
 #include "sets/EURUSD_M1.h"
 #include "sets/EURUSD_M15.h"
 #include "sets/EURUSD_M30.h"
@@ -72,25 +79,24 @@ class Stg_StdDev : public Strategy {
 
   static Stg_StdDev *Init(ENUM_TIMEFRAMES _tf = NULL, long _magic_no = NULL, ENUM_LOG_LEVEL _log_level = V_INFO) {
     // Initialize strategy initial values.
-    Stg_StdDev_Params _params;
+    Indi_StdDev_Params _indi_params(indi_stddev_defaults, _tf);
+    StgParams _stg_params(stg_stddev_defaults);
     if (!Terminal::IsOptimization()) {
-      SetParamsByTf<Stg_StdDev_Params>(_params, _tf, stg_stddev_m1, stg_stddev_m5, stg_stddev_m15, stg_stddev_m30,
-                                       stg_stddev_h1, stg_stddev_h4, stg_stddev_h4);
+      SetParamsByTf<Indi_StdDev_Params>(_indi_params, _tf, indi_stddev_m1, indi_stddev_m5, indi_stddev_m15,
+                                        indi_stddev_m30, indi_stddev_h1, indi_stddev_h4, indi_stddev_h8);
+      SetParamsByTf<StgParams>(_stg_params, _tf, stg_stddev_m1, stg_stddev_m5, stg_stddev_m15, stg_stddev_m30,
+                               stg_stddev_h1, stg_stddev_h4, stg_stddev_h8);
     }
+    // Initialize indicator.
+    StdDevParams stddev_params(_indi_params);
+    _stg_params.SetIndicator(new Indi_StdDev(_indi_params));
     // Initialize strategy parameters.
-    StdDevParams stddev_params(_params.StdDev_MA_Period, _params.StdDev_MA_Shift, _params.StdDev_MA_Method,
-                               _params.StdDev_Applied_Price);
-    stddev_params.SetTf(_tf);
-    StgParams sparams(new Trade(_tf, _Symbol), new Indi_StdDev(stddev_params), NULL, NULL);
-    sparams.logger.Ptr().SetLevel(_log_level);
-    sparams.SetMagicNo(_magic_no);
-    sparams.SetSignals(_params.StdDev_SignalOpenMethod, _params.StdDev_SignalOpenMethod,
-                       _params.StdDev_SignalOpenFilterMethod, _params.StdDev_SignalOpenBoostMethod,
-                       _params.StdDev_SignalCloseMethod, _params.StdDev_SignalCloseMethod);
-    sparams.SetPriceLimits(_params.StdDev_PriceLimitMethod, _params.StdDev_PriceLimitLevel);
-    sparams.SetMaxSpread(_params.StdDev_MaxSpread);
+    _stg_params.GetLog().SetLevel(_log_level);
+    _stg_params.SetMagicNo(_magic_no);
+    _stg_params.SetTf(_tf, _Symbol);
     // Initialize strategy instance.
-    Strategy *_strat = new Stg_StdDev(sparams, "StdDev");
+    Strategy *_strat = new Stg_StdDev(_stg_params, "StdDev");
+    _stg_params.SetStops(_strat, _strat);
     return _strat;
   }
 
@@ -132,27 +138,27 @@ class Stg_StdDev : public Strategy {
     if (_is_valid) {
       switch (_method) {
         case 0: {
-          int _bar_count = (int)_level * (int)_indi.GetMAPeriod();
-          _result = _direction > 0 ? _indi.GetPrice(PRICE_HIGH, _indi.GetHighest(_bar_count))
-                                   : _indi.GetPrice(PRICE_LOW, _indi.GetLowest(_bar_count));
+          int _bar_count0 = (int)_level * (int)_indi.GetMAPeriod();
+          _result = _direction > 0 ? _indi.GetPrice(PRICE_HIGH, _indi.GetHighest(_bar_count0))
+                                   : _indi.GetPrice(PRICE_LOW, _indi.GetLowest(_bar_count0));
           break;
         }
         case 1: {
-          int _bar_count = (int)_level * (int)_indi.GetMAPeriod() * 2;
-          _result = _direction > 0 ? _indi.GetPrice(PRICE_HIGH, _indi.GetHighest(_bar_count))
-                                   : _indi.GetPrice(PRICE_LOW, _indi.GetLowest(_bar_count));
+          int _bar_count1 = (int)_level * (int)_indi.GetMAPeriod() * 2;
+          _result = _direction > 0 ? _indi.GetPrice(PRICE_HIGH, _indi.GetHighest(_bar_count1))
+                                   : _indi.GetPrice(PRICE_LOW, _indi.GetLowest(_bar_count1));
           break;
         }
         case 2: {
-          int _bar_count = (int)_level * (int)_indi.GetMAPeriod();
-          _result = _direction > 0 ? _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetHighest(_bar_count))
-                                   : _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetLowest(_bar_count));
+          int _bar_count2 = (int)_level * (int)_indi.GetMAPeriod();
+          _result = _direction > 0 ? _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetHighest(_bar_count2))
+                                   : _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetLowest(_bar_count2));
           break;
         }
         case 3: {
-          int _bar_count = (int)_level * (int)_indi.GetMAPeriod() * 2;
-          _result = _direction > 0 ? _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetHighest(_bar_count))
-                                   : _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetLowest(_bar_count));
+          int _bar_count3 = (int)_level * (int)_indi.GetMAPeriod() * 2;
+          _result = _direction > 0 ? _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetHighest(_bar_count3))
+                                   : _indi.GetPrice(_indi.GetAppliedPrice(), _indi.GetLowest(_bar_count3));
           break;
         }
       }
