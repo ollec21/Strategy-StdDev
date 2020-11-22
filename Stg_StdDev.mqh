@@ -15,8 +15,8 @@ INPUT int StdDev_SignalOpenFilterMethod = 0.00000000;  // Signal open filter met
 INPUT int StdDev_SignalOpenBoostMethod = 0.00000000;   // Signal open boost method
 INPUT int StdDev_SignalCloseMethod = 0;                // Signal close method (0-
 INPUT float StdDev_SignalCloseLevel = 0.00000000;      // Signal close level
-INPUT int StdDev_PriceLimitMethod = 0;                 // Price limit method
-INPUT float StdDev_PriceLimitLevel = 0;                // Price limit level
+INPUT int StdDev_PriceStopMethod = 0;                  // Price stop method
+INPUT float StdDev_PriceStopLevel = 0;                 // Price stop level
 INPUT int StdDev_TickFilterMethod = 0;                 // Tick filter method
 INPUT float StdDev_MaxSpread = 6.0;                    // Max spread to trade (pips)
 INPUT int StdDev_Shift = 0;                            // Shift
@@ -47,7 +47,7 @@ struct Stg_StdDev_Params_Defaults : StgParams {
   Stg_StdDev_Params_Defaults()
       : StgParams(::StdDev_SignalOpenMethod, ::StdDev_SignalOpenFilterMethod, ::StdDev_SignalOpenLevel,
                   ::StdDev_SignalOpenBoostMethod, ::StdDev_SignalCloseMethod, ::StdDev_SignalCloseLevel,
-                  ::StdDev_PriceLimitMethod, ::StdDev_PriceLimitLevel, ::StdDev_TickFilterMethod, ::StdDev_MaxSpread,
+                  ::StdDev_PriceStopMethod, ::StdDev_PriceStopLevel, ::StdDev_TickFilterMethod, ::StdDev_MaxSpread,
                   ::StdDev_Shift) {}
 } stg_stddev_defaults;
 
@@ -126,9 +126,9 @@ class Stg_StdDev : public Strategy {
   }
 
   /**
-   * Gets price limit value for profit take or stop loss.
+   * Gets price stop value for profit take or stop loss.
    */
-  float PriceLimit(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, float _level = 0.0) {
+  float PriceStop(ENUM_ORDER_TYPE _cmd, ENUM_ORDER_TYPE_VALUE _mode, int _method = 0, float _level = 0.0) {
     Indi_StdDev *_indi = Data();
     bool _is_valid = _indi[CURR].IsValid() && _indi[PREV].IsValid() && _indi[PPREV].IsValid();
     double _trail = _level * Market().GetPipSize();
