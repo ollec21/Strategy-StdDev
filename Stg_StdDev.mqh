@@ -3,10 +3,6 @@
  * Implements StdDev strategy the Standard Deviation indicator.
  */
 
-// Includes.
-#include <EA31337-classes/Indicators/Indi_StdDev.mqh>
-#include <EA31337-classes/Strategy.mqh>
-
 // User input params.
 INPUT float StdDev_LotSize = 0;                        // Lot size
 INPUT int StdDev_SignalOpenMethod = 0;                 // Signal open method (0-

@@ -5,6 +5,8 @@
 
 // Includes EA31337 framework.
 #include <EA31337-classes/EA.mqh>
+#include <EA31337-classes/Indicators/Indi_StdDev.mqh>
+#include <EA31337-classes/Strategy.mqh>
 
 // Inputs.
 input string __StdDev_Parameters__ = "-- StdDev strategy params --";  // >>> STDDEV <<<
