@@ -16,6 +16,7 @@ INPUT float StdDev_PriceStopLevel = 0;                 // Price stop level
 INPUT int StdDev_TickFilterMethod = 0;                 // Tick filter method
 INPUT float StdDev_MaxSpread = 6.0;                    // Max spread to trade (pips)
 INPUT int StdDev_Shift = 0;                            // Shift
+INPUT int StdDev_OrderCloseTime = -10;                 // Order close time in mins (>0) or bars (<0)
 INPUT string __StdDev_Indi_StdDev_Parameters__ =
     "-- StdDev strategy: StdDev indicator params --";              // >>> StdDev strategy: StdDev indicator <<<
 INPUT int Indi_StdDev_MA_Period = 10;                              // Period
@@ -44,7 +45,7 @@ struct Stg_StdDev_Params_Defaults : StgParams {
       : StgParams(::StdDev_SignalOpenMethod, ::StdDev_SignalOpenFilterMethod, ::StdDev_SignalOpenLevel,
                   ::StdDev_SignalOpenBoostMethod, ::StdDev_SignalCloseMethod, ::StdDev_SignalCloseLevel,
                   ::StdDev_PriceStopMethod, ::StdDev_PriceStopLevel, ::StdDev_TickFilterMethod, ::StdDev_MaxSpread,
-                  ::StdDev_Shift) {}
+                  ::StdDev_Shift, ::StdDev_OrderCloseTime) {}
 } stg_stddev_defaults;
 
 // Struct to define strategy parameters to override.
