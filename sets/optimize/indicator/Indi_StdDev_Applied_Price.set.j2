@@ -9,5 +9,5 @@ StdDev_Indi_StdDev_Shift={{ shift | default(0) }}
 StdDev_LotSize={{ lot_size | default(0) }}
 StdDev_PriceStopMethod=0
 StdDev_SignalOpenFilterMethod=1
-StdDev_SignalOpenLevel={{ signal_open_level | default(0) }}
+StdDev_SignalOpenLevel={{ signal_open_level | replace("(float)", "") | float | default(0) }}
 StdDev_TickFilterMethod=1
