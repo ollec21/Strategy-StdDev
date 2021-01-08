@@ -25,7 +25,7 @@ struct Stg_StdDev_Params_{{ Timeframe }} : StgParams {
     signal_close_method = {{ StdDev_SignalCloseMethod | default(0) }};
     signal_close_level = (float){{ StdDev_SignalCloseLevel | default(0) }};
     price_stop_method = {{ StdDev_PriceStopMethod | default(0) }};
-    price_stop_level = {{ StdDev_SignalCloseLevel | default(1) }};
+    price_stop_level = (float){{ StdDev_SignalCloseLevel | default(1) }};
     tick_filter_method = {{ StdDev_TickFilterMethod  | default(1) }};
     max_spread = {{ StdDev_MaxSpread | default(0) }};
   }
