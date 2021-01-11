@@ -18,26 +18,21 @@ INPUT float StdDev_MaxSpread = 4.0;                   // Max spread to trade (pi
 INPUT int StdDev_Shift = 0;                           // Shift
 INPUT int StdDev_OrderCloseTime = -20;                // Order close time in mins (>0) or bars (<0)
 INPUT string __StdDev_Indi_StdDev_Parameters__ =
-    "-- StdDev strategy: StdDev indicator params --";              // >>> StdDev strategy: StdDev indicator <<<
-INPUT int Indi_StdDev_MA_Period = 10;                              // Period
-INPUT int Indi_StdDev_MA_Shift = 0;                                // Shift
-INPUT ENUM_MA_METHOD Indi_StdDev_MA_Method = 1;                    // MA Method
-INPUT ENUM_APPLIED_PRICE Indi_StdDev_Applied_Price = PRICE_CLOSE;  // Applied Price
+    "-- StdDev strategy: StdDev indicator params --";                     // >>> StdDev strategy: StdDev indicator <<<
+INPUT int StdDev_Indi_StdDev_MA_Period = 10;                              // Period
+INPUT int StdDev_Indi_StdDev_MA_Shift = 0;                                // MA Shift
+INPUT ENUM_MA_METHOD StdDev_Indi_StdDev_MA_Method = 1;                    // MA Method
+INPUT ENUM_APPLIED_PRICE StdDev_Indi_StdDev_Applied_Price = PRICE_CLOSE;  // Applied Price
+INPUT int StdDev_Indi_StdDev_Shift = 0;                                   // Shift
 
 // Structs.
 
 // Defines struct with default user indicator values.
 struct Indi_StdDev_Params_Defaults : StdDevParams {
   Indi_StdDev_Params_Defaults()
-      : StdDevParams(::Indi_StdDev_MA_Period, ::Indi_StdDev_MA_Shift, ::Indi_StdDev_MA_Method,
-                     ::Indi_StdDev_Applied_Price) {}
+      : StdDevParams(::StdDev_Indi_StdDev_MA_Period, ::StdDev_Indi_StdDev_MA_Shift, ::StdDev_Indi_StdDev_MA_Method,
+                     ::StdDev_Indi_StdDev_Applied_Price, ::StdDev_Indi_StdDev_Shift) {}
 } indi_stddev_defaults;
-
-// Defines struct to store indicator parameter values.
-struct Indi_StdDev_Params : public StdDevParams {
-  // Struct constructors.
-  void Indi_StdDev_Params(StdDevParams &_params, ENUM_TIMEFRAMES _tf) : StdDevParams(_params, _tf) {}
-};
 
 // Defines struct with default user strategy values.
 struct Stg_StdDev_Params_Defaults : StgParams {
@@ -50,11 +45,11 @@ struct Stg_StdDev_Params_Defaults : StgParams {
 
 // Struct to define strategy parameters to override.
 struct Stg_StdDev_Params : StgParams {
-  Indi_StdDev_Params iparams;
+  StdDevParams iparams;
   StgParams sparams;
 
   // Struct constructors.
-  Stg_StdDev_Params(Indi_StdDev_Params &_iparams, StgParams &_sparams)
+  Stg_StdDev_Params(StdDevParams &_iparams, StgParams &_sparams)
       : iparams(indi_stddev_defaults, _iparams.tf), sparams(stg_stddev_defaults) {
     iparams = _iparams;
     sparams = _sparams;
@@ -76,11 +71,11 @@ class Stg_StdDev : public Strategy {
 
   static Stg_StdDev *Init(ENUM_TIMEFRAMES _tf = NULL, long _magic_no = NULL, ENUM_LOG_LEVEL _log_level = V_INFO) {
     // Initialize strategy initial values.
-    Indi_StdDev_Params _indi_params(indi_stddev_defaults, _tf);
+    StdDevParams _indi_params(indi_stddev_defaults, _tf);
     StgParams _stg_params(stg_stddev_defaults);
     if (!Terminal::IsOptimization()) {
-      SetParamsByTf<Indi_StdDev_Params>(_indi_params, _tf, indi_stddev_m1, indi_stddev_m5, indi_stddev_m15,
-                                        indi_stddev_m30, indi_stddev_h1, indi_stddev_h4, indi_stddev_h8);
+      SetParamsByTf<StdDevParams>(_indi_params, _tf, indi_stddev_m1, indi_stddev_m5, indi_stddev_m15, indi_stddev_m30,
+                                  indi_stddev_h1, indi_stddev_h4, indi_stddev_h8);
       SetParamsByTf<StgParams>(_stg_params, _tf, stg_stddev_m1, stg_stddev_m5, stg_stddev_m15, stg_stddev_m30,
                                stg_stddev_h1, stg_stddev_h4, stg_stddev_h8);
     }

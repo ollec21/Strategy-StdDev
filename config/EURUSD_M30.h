@@ -4,8 +4,8 @@
  */
 
 // Defines indicator's parameter values for the given pair symbol and timeframe.
-struct Indi_StdDev_Params_M30 : Indi_StdDev_Params {
-  Indi_StdDev_Params_M30() : Indi_StdDev_Params(indi_stddev_defaults, PERIOD_M30) { shift = 0; }
+struct Indi_StdDev_Params_M30 : StdDevParams {
+  Indi_StdDev_Params_M30() : StdDevParams(indi_stddev_defaults, PERIOD_M30) { shift = 0; }
 } indi_stddev_m30;
 
 // Defines strategy's parameter values for the given pair symbol and timeframe.
