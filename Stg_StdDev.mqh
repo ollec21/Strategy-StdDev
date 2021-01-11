@@ -21,7 +21,7 @@ INPUT string __StdDev_Indi_StdDev_Parameters__ =
     "-- StdDev strategy: StdDev indicator params --";                     // >>> StdDev strategy: StdDev indicator <<<
 INPUT int StdDev_Indi_StdDev_MA_Period = 10;                              // Period
 INPUT int StdDev_Indi_StdDev_MA_Shift = 0;                                // MA Shift
-INPUT ENUM_MA_METHOD StdDev_Indi_StdDev_MA_Method = 1;                    // MA Method
+INPUT ENUM_MA_METHOD StdDev_Indi_StdDev_MA_Method = (ENUM_MA_METHOD)1;    // MA Method
 INPUT ENUM_APPLIED_PRICE StdDev_Indi_StdDev_Applied_Price = PRICE_CLOSE;  // Applied Price
 INPUT int StdDev_Indi_StdDev_Shift = 0;                                   // Shift
 
