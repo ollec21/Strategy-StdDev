@@ -5,11 +5,11 @@
 
 // User input params.
 INPUT float StdDev_LotSize = 0;                       // Lot size
-INPUT int StdDev_SignalOpenMethod = 0;                // Signal open method (0-
+INPUT int StdDev_SignalOpenMethod = 0;                // Signal open method (-3-3)
 INPUT float StdDev_SignalOpenLevel = 0.0f;            // Signal open level
 INPUT int StdDev_SignalOpenFilterMethod = 1;          // Signal open filter method
-INPUT int StdDev_SignalOpenBoostMethod = 0.00000000;  // Signal open boost method
-INPUT int StdDev_SignalCloseMethod = 0;               // Signal close method (0-
+INPUT int StdDev_SignalOpenBoostMethod = 0;           // Signal open boost method
+INPUT int StdDev_SignalCloseMethod = 0;               // Signal close method (-3-3)
 INPUT float StdDev_SignalCloseLevel = 0.0f;           // Signal close level
 INPUT int StdDev_PriceStopMethod = 0;                 // Price stop method
 INPUT float StdDev_PriceStopLevel = 0;                // Price stop level
@@ -103,14 +103,20 @@ class Stg_StdDev : public Strategy {
       // Note: It doesn't give independent signals. Is used to define volatility (trend strength).
       switch (_cmd) {
         case ORDER_TYPE_BUY:
-          _result = _indi[CURR][0] > _indi[PREV][0] + _level;
-          if (METHOD(_method, 0)) _result &= Chart().GetClose() > Chart().GetOpen();
-          if (METHOD(_method, 1)) _result &= Chart().GetOpen(CURR) > Chart().GetOpen(PREV);
+          _result &= _indi.IsIncreasing(3);
+          _result &= _indi.IsIncByPct(_level, 0, _shift, 3);
+          if (_result && _method != 0) {
+            if (METHOD(_method, 0)) _result &= _indi.IsIncreasing(2, 0, _shift + 3);
+            if (METHOD(_method, 1)) _result &= _indi.IsIncreasing(2, 0, _shift + 5);
+          }
           break;
         case ORDER_TYPE_SELL:
-          _result = _indi[CURR][0] > _indi[PREV][0] + _level;
-          if (METHOD(_method, 0)) _result &= Chart().GetClose() < Chart().GetOpen();
-          if (METHOD(_method, 1)) _result &= Chart().GetOpen(CURR) < Chart().GetOpen(PREV);
+          _result &= _indi.IsDecreasing(3);
+          _result &= _indi.IsDecByPct(-_level, 0, _shift, 3);
+          if (_result && _method != 0) {
+            if (METHOD(_method, 0)) _result &= _indi.IsDecreasing(2, 0, _shift + 3);
+            if (METHOD(_method, 1)) _result &= _indi.IsDecreasing(2, 0, _shift + 5);
+          }
           break;
       }
     }
