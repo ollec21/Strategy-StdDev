@@ -7,7 +7,7 @@
 struct Indi_StdDev_Params_M5 : StdDevParams {
   Indi_StdDev_Params_M5() : StdDevParams(indi_stddev_defaults, PERIOD_M5) {
     applied_price = (ENUM_APPLIED_PRICE)0;
-    ma_method = 0;
+    ma_method = (ENUM_MA_METHOD)0;
     ma_period = 22;
     shift = 0;
   }

@@ -8,7 +8,7 @@ struct Indi_StdDev_Params_{{ Timeframe }} : StdDevParams {
   Indi_StdDev_Params_{{ Timeframe }}() : StdDevParams(indi_stddev_defaults, PERIOD_{{ Timeframe }}) {
     applied_price = (ENUM_APPLIED_PRICE){{ StdDev_Indi_StdDev_Applied_Price | default(0) }};
     ma_method = (ENUM_MA_METHOD){{ StdDev_Indi_StdDev_MA_Method | default(0) }};
-    ma_period = {{ StdDev_Indi_StdDev_Period | default(0) }};
+    ma_period = {{ StdDev_Indi_StdDev_MA_Period | default(0) }};
     shift = {{ StdDev_Indi_StdDev_Shift | default(0) }};
   }
 } indi_stddev_{{ Timeframe | lower }};
