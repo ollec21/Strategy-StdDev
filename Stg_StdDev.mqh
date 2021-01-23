@@ -4,19 +4,20 @@
  */
 
 // User input params.
-INPUT float StdDev_LotSize = 0;                       // Lot size
-INPUT int StdDev_SignalOpenMethod = 0;                // Signal open method (-3-3)
-INPUT float StdDev_SignalOpenLevel = 0.0f;            // Signal open level
-INPUT int StdDev_SignalOpenFilterMethod = 1;          // Signal open filter method
-INPUT int StdDev_SignalOpenBoostMethod = 0;           // Signal open boost method
-INPUT int StdDev_SignalCloseMethod = 0;               // Signal close method (-3-3)
-INPUT float StdDev_SignalCloseLevel = 0.0f;           // Signal close level
-INPUT int StdDev_PriceStopMethod = 0;                 // Price stop method
-INPUT float StdDev_PriceStopLevel = 0;                // Price stop level
-INPUT int StdDev_TickFilterMethod = 1;                // Tick filter method
-INPUT float StdDev_MaxSpread = 4.0;                   // Max spread to trade (pips)
-INPUT int StdDev_Shift = 0;                           // Shift
-INPUT int StdDev_OrderCloseTime = -20;                // Order close time in mins (>0) or bars (<0)
+INPUT string __StdDev_Parameters__ = "-- StdDev strategy params --";  // >>> STDDEV <<<
+INPUT float StdDev_LotSize = 0;                                       // Lot size
+INPUT int StdDev_SignalOpenMethod = 0;                                // Signal open method (-3-3)
+INPUT float StdDev_SignalOpenLevel = 0.0f;                            // Signal open level
+INPUT int StdDev_SignalOpenFilterMethod = 1;                          // Signal open filter method
+INPUT int StdDev_SignalOpenBoostMethod = 0;                           // Signal open boost method
+INPUT int StdDev_SignalCloseMethod = 0;                               // Signal close method (-3-3)
+INPUT float StdDev_SignalCloseLevel = 0.0f;                           // Signal close level
+INPUT int StdDev_PriceStopMethod = 0;                                 // Price stop method
+INPUT float StdDev_PriceStopLevel = 0;                                // Price stop level
+INPUT int StdDev_TickFilterMethod = 1;                                // Tick filter method
+INPUT float StdDev_MaxSpread = 4.0;                                   // Max spread to trade (pips)
+INPUT int StdDev_Shift = 0;                                           // Shift
+INPUT int StdDev_OrderCloseTime = -20;                                // Order close time in mins (>0) or bars (<0)
 INPUT string __StdDev_Indi_StdDev_Parameters__ =
     "-- StdDev strategy: StdDev indicator params --";                     // >>> StdDev strategy: StdDev indicator <<<
 INPUT int StdDev_Indi_StdDev_MA_Period = 10;                              // Period
