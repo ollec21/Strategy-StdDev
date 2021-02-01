@@ -74,12 +74,12 @@ class Stg_StdDev : public Strategy {
     // Initialize strategy initial values.
     StdDevParams _indi_params(indi_stddev_defaults, _tf);
     StgParams _stg_params(stg_stddev_defaults);
-    if (!Terminal::IsOptimization()) {
-      SetParamsByTf<StdDevParams>(_indi_params, _tf, indi_stddev_m1, indi_stddev_m5, indi_stddev_m15, indi_stddev_m30,
-                                  indi_stddev_h1, indi_stddev_h4, indi_stddev_h8);
-      SetParamsByTf<StgParams>(_stg_params, _tf, stg_stddev_m1, stg_stddev_m5, stg_stddev_m15, stg_stddev_m30,
-                               stg_stddev_h1, stg_stddev_h4, stg_stddev_h8);
-    }
+#ifdef __config__
+    SetParamsByTf<StdDevParams>(_indi_params, _tf, indi_stddev_m1, indi_stddev_m5, indi_stddev_m15, indi_stddev_m30,
+                                indi_stddev_h1, indi_stddev_h4, indi_stddev_h8);
+    SetParamsByTf<StgParams>(_stg_params, _tf, stg_stddev_m1, stg_stddev_m5, stg_stddev_m15, stg_stddev_m30,
+                             stg_stddev_h1, stg_stddev_h4, stg_stddev_h8);
+#endif
     // Initialize indicator.
     StdDevParams stddev_params(_indi_params);
     _stg_params.SetIndicator(new Indi_StdDev(_indi_params));
